@@ -36,7 +36,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.4</version>
                 <configuration>
-                    <mainClass>com.ola.rutamascorta.App</mainClass>
+                    <mainClass>com.ola.rutamascorta.MainApp</mainClass>
                 </configuration>
                 <executions>
                     <execution>
