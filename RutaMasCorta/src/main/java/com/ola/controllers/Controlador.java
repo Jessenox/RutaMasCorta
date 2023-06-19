@@ -4,7 +4,6 @@ public class Controlador {
     private int nodeBase;
     private int nodeEnded;
     private int nodeDistance;
-    private int tag;
 
     public int getNodeBase() {
         return nodeBase;
@@ -28,13 +27,5 @@ public class Controlador {
 
     public void setNodeDistance(int nodeDistance) {
         this.nodeDistance = nodeDistance;
-    }
-    
-    public int getTag() {
-        return tag;
-    }
-
-    public void setTag(int tag) {
-        this.tag = tag;
     }
 }

@@ -1,7 +1,9 @@
 package com.ola.rutamascorta;
 
 import com.ola.controllers.Controlador;
+import com.ola.controllers.TagController;
 import java.util.ArrayList;
+import java.util.List;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -19,6 +21,7 @@ import javafx.stage.Stage;
 public class MainApp extends Application{
     int cont = 0;
     ArrayList<Controlador> array = new ArrayList<>();
+    ArrayList<TagController> tags = new ArrayList<>();
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -92,9 +95,11 @@ public class MainApp extends Application{
     
     
     private void getAllNodesData(VBox nodeContainer) {
+        // Get HBox containers
         for (Node nodo: nodeContainer.getChildren()) { 
             HBox fields = (HBox)nodo;
             Controlador obj = new Controlador();
+            // Get TextFields containers
             for(Node txtFields: fields.getChildren()){
                 TextField aux = (TextField)txtFields;
                 switch (aux.getId()) {
@@ -111,10 +116,11 @@ public class MainApp extends Application{
                         throw new AssertionError();
                 }
             }
+            // Add nodes information to ArrayList
             array.add(obj);
         }
     }
-    
+    // Window that shows the result and a graph
     private void resultWindow() {
         AnchorPane root = new AnchorPane();
         Scene resultWindowScene = new Scene(root, 860, 480, Color.WHITE);
@@ -127,7 +133,7 @@ public class MainApp extends Application{
         GraphicsContext gc = canvas.getGraphicsContext2D();
         
         gc.setFill(Color.YELLOW);
-        gc.fillOval(30, 30, 70, 70);
+        gc.strokeOval(30, 30, 70, 70);
         mainContainer.getChildren().addAll(resultLabel, txtResultLabel, canvas);
         
         root.getChildren().add(mainContainer);
@@ -135,5 +141,33 @@ public class MainApp extends Application{
         resultWindowStage.setScene(resultWindowScene);
         resultWindowStage.setTitle("Resultado");
         resultWindowStage.show();
+    }
+    
+    private void shortestPath (ArrayList<Controlador> al) {
+        List<Integer> nodos = new ArrayList<>();
+        Integer dist = 0;
+        // Get All nodes
+        for (Controlador controlador : al) {
+            if(!nodos.contains(controlador.getNodeBase())){
+                nodos.add(controlador.getNodeBase());
+            }
+        }
+        for (Integer nodo : nodos) {
+            for (Controlador ctrl : al) {
+                TagController obj = new TagController();
+                obj.setNode(ctrl.getNodeEnded());
+                if(nodo == ctrl.getNodeEnded()) {
+                    if(dist == 0) {
+                        dist = ctrl.getNodeDistance();
+                    } else {
+                        if(ctrl.getNodeDistance() < dist) {
+                            obj.setTagDistance(dist);
+                            obj.setTagOrigin(ctrl.getNodeBase());
+                        }
+                    }
+                }
+                tags.add(obj);
+            }
+        }
     }
 }
