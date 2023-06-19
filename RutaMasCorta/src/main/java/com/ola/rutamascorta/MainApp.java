@@ -9,7 +9,9 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
@@ -20,8 +22,11 @@ import javafx.stage.Stage;
 
 public class MainApp extends Application{
     int cont = 0;
+    int nodoOrigen;
+    int nodoDestino;
     ArrayList<Controlador> array = new ArrayList<>();
     ArrayList<TagController> tags = new ArrayList<>();
+    List<Integer> nodos = new ArrayList<>();
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -77,7 +82,11 @@ public class MainApp extends Application{
         // Event handler for calculateButton
         calculateButton.setOnAction(eh -> {
             getAllNodesData(nodesContainer);
-            resultWindow();
+            getActualNodes(array);
+            showOriginNodeMessage();
+            showDestinationNodeMessage();
+            //shortestPath(array);
+            //resultWindow();
         });
         
         actionButtonsContainer.getChildren().addAll(addNodeButton, removeNodeButton);
@@ -93,6 +102,14 @@ public class MainApp extends Application{
         launch();
     }
     
+    private void getActualNodes(ArrayList<Controlador> al){
+        // Get All nodes
+        for (Controlador controlador : al) {
+            if(!nodos.contains(controlador.getNodeBase())){
+                nodos.add(controlador.getNodeBase());
+            }
+        }
+    }
     
     private void getAllNodesData(VBox nodeContainer) {
         // Get HBox containers
@@ -144,30 +161,56 @@ public class MainApp extends Application{
     }
     
     private void shortestPath (ArrayList<Controlador> al) {
-        List<Integer> nodos = new ArrayList<>();
         Integer dist = 0;
-        // Get All nodes
-        for (Controlador controlador : al) {
-            if(!nodos.contains(controlador.getNodeBase())){
-                nodos.add(controlador.getNodeBase());
-            }
-        }
+        Integer nodeOrigin = 0;
+        Boolean exists = false;
+        // Check node's distance
         for (Integer nodo : nodos) {
+            TagController obj = new TagController();
             for (Controlador ctrl : al) {
-                TagController obj = new TagController();
-                obj.setNode(ctrl.getNodeEnded());
+                // Verify the node with current loop
                 if(nodo == ctrl.getNodeEnded()) {
                     if(dist == 0) {
                         dist = ctrl.getNodeDistance();
+                        nodeOrigin = ctrl.getNodeBase();
                     } else {
                         if(ctrl.getNodeDistance() < dist) {
-                            obj.setTagDistance(dist);
-                            obj.setTagOrigin(ctrl.getNodeBase());
+                            dist = ctrl.getNodeDistance();
+                            nodeOrigin = ctrl.getNodeBase();
                         }
                     }
                 }
-                tags.add(obj);
             }
+            obj.setNode(nodo);
+            if(nodeOrigin == 0) {
+                obj.setTagOrigin(0);
+                obj.setTagDistance(0);
+            } else {
+                obj.setTagOrigin(nodeOrigin);
+                obj.setTagDistance(dist);
+            }
+            tags.add(obj);
+            dist = 0;
         }
+        for (TagController tag : tags) {
+            System.out.println("Nodo: " + tag.getNode());
+            System.out.println("Nodo origen " + tag.getTagOrigin());
+            System.out.println("Distancia " + tag.getTagDistance());
+        }
+    }
+    
+    private void showOriginNodeMessage(){
+        ChoiceDialog cd = new ChoiceDialog(nodos.toArray()[0],nodos.toArray());
+        cd.setHeaderText("Selecciona nodo origen");
+        cd.showAndWait();
+        nodoOrigen = (int)cd.getSelectedItem();
+        System.out.println("Nodo origen: " + nodoOrigen);
+    }
+    private void showDestinationNodeMessage(){
+        ChoiceDialog cd = new ChoiceDialog(nodos.toArray()[0],nodos.toArray());
+        cd.setHeaderText("Selecciona nodo destino");
+        cd.showAndWait();
+        nodoDestino = (int)cd.getSelectedItem();
+        System.out.println("Nodo destino: " + nodoDestino);
     }
 }
