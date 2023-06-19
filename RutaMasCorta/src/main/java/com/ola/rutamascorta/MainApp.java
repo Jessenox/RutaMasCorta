@@ -26,6 +26,7 @@ public class MainApp extends Application{
     int nodoDestino;
     ArrayList<Controlador> array = new ArrayList<>();
     ArrayList<TagController> tags = new ArrayList<>();
+    ArrayList<TagController> shortestPath = new ArrayList<>();
     List<Integer> nodos = new ArrayList<>();
     
     @Override
@@ -85,7 +86,7 @@ public class MainApp extends Application{
             getActualNodes(array);
             showOriginNodeMessage();
             showDestinationNodeMessage();
-            //shortestPath(array);
+            shortestPath(array);
             //resultWindow();
         });
         
@@ -107,6 +108,9 @@ public class MainApp extends Application{
         for (Controlador controlador : al) {
             if(!nodos.contains(controlador.getNodeBase())){
                 nodos.add(controlador.getNodeBase());
+            }
+            if(!nodos.contains(controlador.getNodeEnded())){
+                nodos.add(controlador.getNodeEnded());
             }
         }
     }
@@ -162,6 +166,7 @@ public class MainApp extends Application{
     
     private void shortestPath (ArrayList<Controlador> al) {
         Integer dist = 0;
+        Integer distAnt = 0;
         Integer nodeOrigin = 0;
         Boolean exists = false;
         // Check node's distance
@@ -187,7 +192,8 @@ public class MainApp extends Application{
                 obj.setTagDistance(0);
             } else {
                 obj.setTagOrigin(nodeOrigin);
-                obj.setTagDistance(dist);
+                obj.setTagDistance(dist + distAnt);
+                distAnt = dist;
             }
             tags.add(obj);
             dist = 0;
@@ -196,6 +202,24 @@ public class MainApp extends Application{
             System.out.println("Nodo: " + tag.getNode());
             System.out.println("Nodo origen " + tag.getTagOrigin());
             System.out.println("Distancia " + tag.getTagDistance());
+        }
+        int j = 0;
+        int k = tags.size();
+        while(true){
+            if (tags.get(j).getNode() == nodoDestino) {
+                shortestPath.add(tags.get(j));
+                if(nodoOrigen == tags.get(j).getTagOrigin()){
+                    break;
+                }
+                nodoDestino = tags.get(j).getTagOrigin();
+            }
+            if (j < k)
+                j++;
+            else
+                j = 0;
+        }
+        for (TagController pat : shortestPath) {
+            System.out.print("-" + pat.getNode());
         }
     }
     
