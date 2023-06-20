@@ -3,7 +3,9 @@ package com.ola.rutamascorta;
 import com.ola.controllers.Controlador;
 import com.ola.controllers.TagController;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -24,6 +26,7 @@ public class MainApp extends Application{
     int cont = 0;
     int nodoOrigen;
     int nodoDestino;
+    int distanciaTotal = 0;
     ArrayList<Controlador> array = new ArrayList<>();
     ArrayList<TagController> tags = new ArrayList<>();
     ArrayList<TagController> shortestPath = new ArrayList<>();
@@ -81,13 +84,14 @@ public class MainApp extends Application{
         });
         
         // Event handler for calculateButton
-        calculateButton.setOnAction(eh -> {
+        calculateButton.setOnAction(eh -> {/*
             getAllNodesData(nodesContainer);
             getActualNodes(array);
             showOriginNodeMessage();
             showDestinationNodeMessage();
             shortestPath(array);
-            //resultWindow();
+*/
+            resultWindow();
         });
         
         actionButtonsContainer.getChildren().addAll(addNodeButton, removeNodeButton);
@@ -113,6 +117,7 @@ public class MainApp extends Application{
                 nodos.add(controlador.getNodeEnded());
             }
         }
+        Collections.sort(nodos);
     }
     
     private void getAllNodesData(VBox nodeContainer) {
@@ -141,85 +146,30 @@ public class MainApp extends Application{
             array.add(obj);
         }
     }
-    // Window that shows the result and a graph
-    private void resultWindow() {
-        AnchorPane root = new AnchorPane();
-        Scene resultWindowScene = new Scene(root, 860, 480, Color.WHITE);
-        Stage resultWindowStage = new Stage();
-        
-        VBox mainContainer = new VBox();
-        Label resultLabel = new Label("Resultado");
-        Label txtResultLabel = new Label("La ruta mas corta es: ");
-        Canvas canvas = new Canvas(840, 300);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        
-        gc.setFill(Color.YELLOW);
-        gc.strokeOval(30, 30, 70, 70);
-        mainContainer.getChildren().addAll(resultLabel, txtResultLabel, canvas);
-        
-        root.getChildren().add(mainContainer);
-        // Set scene and show the window
-        resultWindowStage.setScene(resultWindowScene);
-        resultWindowStage.setTitle("Resultado");
-        resultWindowStage.show();
-    }
     
     private void shortestPath (ArrayList<Controlador> al) {
-        Integer dist = 0;
-        Integer distAnt = 0;
-        Integer nodeOrigin = 0;
-        Boolean exists = false;
-        // Check node's distance
-        for (Integer nodo : nodos) {
-            TagController obj = new TagController();
-            for (Controlador ctrl : al) {
-                // Verify the node with current loop
-                if(nodo == ctrl.getNodeEnded()) {
-                    if(dist == 0) {
-                        dist = ctrl.getNodeDistance();
-                        nodeOrigin = ctrl.getNodeBase();
-                    } else {
-                        if(ctrl.getNodeDistance() < dist) {
-                            dist = ctrl.getNodeDistance();
-                            nodeOrigin = ctrl.getNodeBase();
-                        }
-                    }
-                }
-            }
-            obj.setNode(nodo);
-            if(nodeOrigin == 0) {
-                obj.setTagOrigin(0);
-                obj.setTagDistance(0);
-            } else {
-                obj.setTagOrigin(nodeOrigin);
-                obj.setTagDistance(dist + distAnt);
-                distAnt = dist;
-            }
-            tags.add(obj);
-            dist = 0;
-        }
+        tagDistanceCalculation();
         for (TagController tag : tags) {
             System.out.println("Nodo: " + tag.getNode());
-            System.out.println("Nodo origen " + tag.getTagOrigin());
             System.out.println("Distancia " + tag.getTagDistance());
+            System.out.println("Nodo destino: " + tag.getTagOrigin());
         }
-        int j = 0;
+        int i = 0;
         int k = tags.size();
-        while(true){
-            if (tags.get(j).getNode() == nodoDestino) {
-                shortestPath.add(tags.get(j));
-                if(nodoOrigen == tags.get(j).getTagOrigin()){
-                    break;
-                }
-                nodoDestino = tags.get(j).getTagOrigin();
+        int j = nodoOrigen;
+        while(j != nodoDestino){
+            if(tags.get(i).getNode() == j){
+                shortestPath.add(tags.get(i));
+                j = tags.get(i).getTagOrigin();
+                distanciaTotal += tags.get(i).getTagDistance();
             }
-            if (j < k)
-                j++;
-            else
-                j = 0;
+            i++;
+            if(i == k-1)
+                i = 0;
         }
-        for (TagController pat : shortestPath) {
-            System.out.print("-" + pat.getNode());
+        System.out.println("Ruta mas corta");
+        for (TagController sp : shortestPath) {
+            System.out.println(sp.getNode()+" "+sp.getTagDistance()+" "+sp.getTagOrigin());
         }
     }
     
@@ -236,5 +186,65 @@ public class MainApp extends Application{
         cd.showAndWait();
         nodoDestino = (int)cd.getSelectedItem();
         System.out.println("Nodo destino: " + nodoDestino);
+    }
+    private void tagDistanceCalculation() {
+        int distance = 0;
+        int nodoMenor = 0;
+        int aux;
+        for (Integer nodo : nodos) {
+            TagController tagObj = new TagController();
+            if(nodo == nodoDestino){
+                tagObj.setNode(nodo);
+                tagObj.setTagDistance(0);
+                tagObj.setTagOrigin(0);
+            } else {
+                // Get node with their branches
+                List<Controlador> cjn = array.stream().filter(item -> 
+                    item.getNodeBase()== nodo)
+                    .collect(Collectors.toList());
+                // Get the minum distance
+                for (Controlador ls : cjn) {
+                    aux = ls.getNodeDistance();
+                    if(distance == 0){
+                        distance = aux;
+                        nodoMenor = ls.getNodeEnded();
+                    } else{
+                        if(aux < distance){
+                            distance = aux;
+                            nodoMenor = ls.getNodeEnded();
+                        }
+                    }
+                }      
+                //set data
+                tagObj.setNode(nodo);
+                tagObj.setTagDistance(distance);
+                tagObj.setTagOrigin(nodoMenor);
+            }
+            tags.add(tagObj);
+            distance = 0;
+            nodoMenor = 0;
+        }
+    }
+        // Window that shows the result and a graph
+    private void resultWindow() {
+        AnchorPane root = new AnchorPane();
+        Scene resultWindowScene = new Scene(root, 860, 480, Color.WHITE);
+        Stage resultWindowStage = new Stage();
+        
+        VBox mainContainer = new VBox();
+        Label resultLabel = new Label("Resultado");
+        Label txtResultLabel = new Label("La ruta mas corta es: ");
+        Canvas canvas = new Canvas(840, 400);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        
+        gc.setFill(Color.YELLOW);
+        gc.strokeOval(20, 200, 40, 40);
+        mainContainer.getChildren().addAll(resultLabel, txtResultLabel, canvas);
+        
+        root.getChildren().add(mainContainer);
+        // Set scene and show the window
+        resultWindowStage.setScene(resultWindowScene);
+        resultWindowStage.setTitle("Resultado");
+        resultWindowStage.show();
     }
 }
