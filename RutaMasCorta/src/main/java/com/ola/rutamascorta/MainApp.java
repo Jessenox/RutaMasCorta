@@ -237,8 +237,29 @@ public class MainApp extends Application{
         Canvas canvas = new Canvas(840, 400);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         
-        gc.setFill(Color.YELLOW);
-        gc.strokeOval(20, 200, 40, 40);
+        int numeros[] = {1,2,3,4,5,6,7,8,9,10};
+        int x = 20, y= 200;
+        for (int i = 0, j = 1; i < numeros.length; i++, j++) {
+            switch (j) {
+                case 1:
+                    gc.strokeOval(x, y, 40, 40);
+                    gc.fillText(String.valueOf(i), x+15, y+25);
+                    break;
+                case 2:
+                    gc.strokeOval((x)+100, y-100, 40, 40);
+                    gc.fillText(String.valueOf(i), x+115, y-75);
+                    break;
+                case 3:
+                    gc.strokeOval((x)+100, y+100, 40, 40);
+                    gc.fillText(String.valueOf(i), x+115, y+125);
+                    break;
+                default:
+                    x += 200;
+                    j = 0;
+            }
+        }
+        //gc.strokeOval(20, 200, 40, 40);
+        
         mainContainer.getChildren().addAll(resultLabel, txtResultLabel, canvas);
         
         root.getChildren().add(mainContainer);
@@ -247,4 +268,6 @@ public class MainApp extends Application{
         resultWindowStage.setTitle("Resultado");
         resultWindowStage.show();
     }
+    
+
 }
