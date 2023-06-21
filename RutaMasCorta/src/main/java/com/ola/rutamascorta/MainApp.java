@@ -1,6 +1,7 @@
 package com.ola.rutamascorta;
 
 import com.ola.controllers.Controlador;
+import com.ola.controllers.DrawNode;
 import com.ola.controllers.TagController;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +12,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
@@ -84,13 +84,12 @@ public class MainApp extends Application{
         });
         
         // Event handler for calculateButton
-        calculateButton.setOnAction(eh -> {/*
+        calculateButton.setOnAction(eh -> {
             getAllNodesData(nodesContainer);
             getActualNodes(array);
             showOriginNodeMessage();
             showDestinationNodeMessage();
             shortestPath(array);
-*/
             resultWindow();
         });
         
@@ -237,28 +236,89 @@ public class MainApp extends Application{
         Canvas canvas = new Canvas(840, 400);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         
-        int numeros[] = {1,2,3,4,5,6,7,8,9,10};
+        // int numeros[] = {1,2,3,4,5,6,7,8,9,10};
         int x = 20, y= 200;
-        for (int i = 0, j = 1; i < numeros.length; i++, j++) {
+        ArrayList<DrawNode> positions = new ArrayList<>();
+        ArrayList<DrawNode> textPositions = new ArrayList<>();
+        
+        // Set nodes positions
+        for (int i = 0, j = 1; i < nodos.size(); i++, j++) {
+            DrawNode dn = new DrawNode();
+            DrawNode dn2 = new DrawNode();
             switch (j) {
                 case 1:
-                    gc.strokeOval(x, y, 40, 40);
-                    gc.fillText(String.valueOf(i), x+15, y+25);
+                    dn.setX(x);
+                    dn.setY(y);
+                    dn.setNodo(nodos.get(i));
+                    positions.add(dn);
+                    dn2.setX(x+15);
+                    dn2.setY(y+25);
+                    dn2.setNodo(nodos.get(i));
+                    textPositions.add(dn2);
                     break;
                 case 2:
-                    gc.strokeOval((x)+100, y-100, 40, 40);
-                    gc.fillText(String.valueOf(i), x+115, y-75);
+                    dn.setX(x+50);
+                    dn.setY(y-100);
+                    dn.setNodo(nodos.get(i));
+                    positions.add(dn);
+                    dn2.setX(x+65);
+                    dn2.setY(y-75);
+                    dn2.setNodo(nodos.get(i));
+                    textPositions.add(dn2);
                     break;
                 case 3:
-                    gc.strokeOval((x)+100, y+100, 40, 40);
-                    gc.fillText(String.valueOf(i), x+115, y+125);
-                    break;
-                default:
-                    x += 200;
+                    dn.setX(x+50);
+                    dn.setY(y+100);
+                    dn.setNodo(nodos.get(i));
+                    positions.add(dn);
+                    dn2.setX(x+65);
+                    dn2.setY(y+125);
+                    dn2.setNodo(nodos.get(i));
+                    textPositions.add(dn2);
+                    
+                    x += 250;
                     j = 0;
+                    break;
+            }
+            System.out.println("Nodo: " + nodos.get(i));
+        }
+        System.out.println("Tamanno: " + nodos.size());
+        for (Controlador data : array) {
+            int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+            int xm, ym;
+            for (DrawNode pos : textPositions) {
+                if(data.getNodeBase() == pos.getNodo()) {
+                    x1 = pos.getX();
+                    y1 = pos.getY();
+                }
+            }
+            for (DrawNode pos : textPositions) {
+                if(data.getNodeEnded()== pos.getNodo()) {
+                    x2 = pos.getX();
+                    y2 = pos.getY();
+                }
+            }
+            xm = (x2 + x1) / 2;
+            ym = (y2 + y1) / 2;
+            if(x1 != 0 ||y1 != 0 ||x2 != 0 || y2 != 0){
+                gc.fillText(String.valueOf(data.getNodeDistance()), xm, ym);
+                gc.strokeLine(x1, y1, x2, y2);
             }
         }
-        //gc.strokeOval(20, 200, 40, 40);
+        
+        // Draw nodes
+        for (DrawNode position : positions) {
+            gc.setFill(Color.BLACK);
+            System.out.println("x: " + position.getX() + " y: " + position.getY());
+            gc.strokeOval(position.getX(), position.getY(), 40, 40);
+            gc.setFill(Color.WHITE);
+            gc.fillOval(position.getX(), position.getY(), 40, 40);
+        }
+        gc.setFill(Color.BLACK);
+        for (DrawNode txtPos : textPositions) {
+            gc.fillText(String.valueOf(txtPos.getNodo()), txtPos.getX(), txtPos.getY());
+        }
+        
         
         mainContainer.getChildren().addAll(resultLabel, txtResultLabel, canvas);
         
