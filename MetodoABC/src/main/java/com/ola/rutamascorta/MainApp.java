@@ -295,11 +295,12 @@ public class MainApp extends Application{
         barChart.setPrefHeight(400);
         lineChart.setPrefHeight(400);
         
-        StackPane stackedPane = new StackPane();
-        stackedPane.getChildren().addAll(barChart, lineChart);
+        barChart.setAnimated(false);
+        lineChart.setAnimated(false);
+        
         
         Stage graficaStage = new Stage();
-        Scene graficaScene = new Scene(stackedPane, 800, 600);
+        Scene graficaScene = new Scene(chartContainer, 800, 600);
         graficaStage.setScene(graficaScene);
         graficaStage.setTitle("Gráficos");
         graficaStage.show();
