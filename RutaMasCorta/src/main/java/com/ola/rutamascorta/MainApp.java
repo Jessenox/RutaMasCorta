@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -18,8 +20,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class MainApp extends Application{
@@ -38,15 +43,25 @@ public class MainApp extends Application{
         Scene s = new Scene(root, 860, 480, Color.WHITE);
         
         
-        Label lab1 = new Label("Ruta mas corta");
-        VBox mainLabel = new VBox();
         
+        Label lab1 = new Label("Ruta mas corta");
+        lab1.setFont(new Font("Roboto", 32));
+        lab1.setAlignment(Pos.CENTER);
+        
+        VBox mainLabel = new VBox();
+        mainLabel.setMaxWidth(Double.MAX_VALUE);
         // Texto de nodos, etc
         HBox txtContainer = new HBox();
         Label ndIniLabel = new Label("Nodo Inicial");
         Label ndFinLabel = new Label("Nodo Final");
         Label ndDistance = new Label("Distancia");
-        txtContainer.getChildren().addAll(ndIniLabel, ndDistance, ndFinLabel);
+        Region spacer = new Region();
+        txtContainer.setHgrow(spacer, Priority.ALWAYS);
+        
+        Region spacer1 = new Region();
+        txtContainer.setHgrow(spacer1, Priority.ALWAYS);
+        
+        txtContainer.getChildren().addAll(ndIniLabel, spacer, ndDistance, spacer1, ndFinLabel);
         
         VBox nodesContainer = new VBox();
         HBox actionButtonsContainer = new HBox();
@@ -280,9 +295,8 @@ public class MainApp extends Application{
                     j = 0;
                     break;
             }
-            System.out.println("Nodo: " + nodos.get(i));
         }
-        System.out.println("Tamanno: " + nodos.size());
+        
         for (Controlador data : array) {
             int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
             int xm, ym;
@@ -309,7 +323,6 @@ public class MainApp extends Application{
         // Draw nodes
         for (DrawNode position : positions) {
             gc.setFill(Color.BLACK);
-            System.out.println("x: " + position.getX() + " y: " + position.getY());
             gc.strokeOval(position.getX(), position.getY(), 40, 40);
             gc.setFill(Color.WHITE);
             gc.fillOval(position.getX(), position.getY(), 40, 40);
@@ -318,8 +331,10 @@ public class MainApp extends Application{
         for (DrawNode txtPos : textPositions) {
             gc.fillText(String.valueOf(txtPos.getNodo()), txtPos.getX(), txtPos.getY());
         }
-        
-        
+        System.out.println("Ruta Critica");
+        for (TagController sp : shortestPath) {
+            System.out.println(sp.getNode()+" " + sp.getTagDistance() + " "+sp.getTagOrigin());
+        }
         mainContainer.getChildren().addAll(resultLabel, txtResultLabel, canvas);
         
         root.getChildren().add(mainContainer);
